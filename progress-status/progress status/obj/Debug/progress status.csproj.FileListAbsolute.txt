@@ -21,3 +21,10 @@ D:\workfile\code\progress status\progress status\obj\Debug\progress status.cspro
 F:\borda\progress-status\progress status\bin\Debug\progress status.exe.config
 F:\borda\progress-status\progress status\obj\Debug\progress status.exe
 F:\borda\progress-status\progress status\obj\Debug\progress status.pdb
+F:\borda\progress-status\progress status\obj\Debug\progress status.csprojResolveAssemblyReference.cache
+F:\borda\progress-status\progress status\obj\Debug\progress_status.Form1.resources
+F:\borda\progress-status\progress status\obj\Debug\progress_status.login.resources
+F:\borda\progress-status\progress status\obj\Debug\progress_status.Properties.Resources.resources
+F:\borda\progress-status\progress status\obj\Debug\progress status.csproj.GenerateResource.Cache
+F:\borda\progress-status\progress status\bin\Debug\progress status.exe
+F:\borda\progress-status\progress status\bin\Debug\progress status.pdb

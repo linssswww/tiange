@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Xml;
 
 namespace progress_status
 {
@@ -11,6 +12,14 @@ namespace progress_status
     {
         public string employName;
     };
+    public struct XmlInfo
+    {
+        public string username;
+        public string writetime;
+        public string segmented;
+
+    }
+
     public class Data
     {
         public Data() { }
@@ -50,6 +59,10 @@ namespace progress_status
         {
 
         }
+        public int calGroups()
+        {
+            return 0;
+        }
         public void getNamePath()//获取当天的时间.
         {
             string path = System.IO.Directory.GetCurrentDirectory() + "\\image";
@@ -57,7 +70,7 @@ namespace progress_status
             if (!Directory.Exists(path))
                 throw new Exception("无法找到文件夹：line 66, locate getPath");
 
-            namePath = path;
+            m_namePath = path;
             //DirectoryInfo theFolder = new DirectoryInfo(path);
 
             //string tm = DateTime.Now.ToString("yyMMdd");
@@ -110,8 +123,65 @@ namespace progress_status
            // time.Day = tim.ElementAt
             return null;
         }
- /***********************************************************************/
- /************************************************************************/
+        //获取所有目录的路径
+        public void GetAllDirList(string strBaseDir)
+        {
+            DirectoryInfo di = new DirectoryInfo(strBaseDir);
+            DirectoryInfo[] diA = di.GetDirectories();
+            for (int i = 0; i < diA.Length; i++)
+            {
+                m_xmlList.Add(diA[i].FullName);
+                //diA[i].FullName是某个子目录的绝对地址，把它记录在ArrayList中
+                GetAllDirList(diA[i].FullName);
+            }
+        }
+        public void getXmlPaths()
+        {
+            string path = "./image";
+            GetAllDirList(path);
+            foreach(var str in m_xmlList)
+            {
+                DirectoryInfo dir = new DirectoryInfo(str);
+                foreach(var filexml in dir.GetFiles(".xml"))
+                {
+                    m_fullXML.Add(filexml.FullName);
+                }
+            }
+        }
+        public void decodeXml()
+        {
+            foreach(var path in m_fullXML)
+            {
+                XmlInfo singlexml;
+                var xdoc = new System.Xml.XmlDocument();
+                xdoc.Load(path);
+                XmlNode xNode = xdoc.SelectSingleNode("username");
+                singlexml.username = xNode.InnerText;
+
+                XmlNode xNode1 = xdoc.SelectSingleNode("writetime");
+                singlexml.writetime = xNode1.InnerText;
+
+                XmlNode xNode2 = xdoc.SelectSingleNode("segmented");
+                singlexml.segmented = xNode2.InnerText;
+                m_fullXMLInfo.Add(singlexml);
+            }
+        }
+        public List<XmlInfo> filterXml(string format) // format = name|writetime 
+        {
+            
+            List<XmlInfo> muti = new List<XmlInfo>();
+            foreach(var filexml in m_fullXMLInfo)
+            {
+                string info = filexml.username + "|" + filexml.writetime;
+                if(info.Contains(format))
+                    muti.Add(filexml);
+            }
+            if (muti.Count == 0)
+                throw new Exception("原因:xml文件数量为0，filterXml");
+            return muti;
+        }
+        /***********************************************************************/
+        /************************************************************************/
         public int getImagesNum(string name, string tim)//拍照数量
         {
             //获取当天的对应人当天的
@@ -170,30 +240,47 @@ namespace progress_status
 
             return danum + dunum;
         }
-        public void getDealImageNum(string usernm, string tim)//打标签图片数量(打标签名字， 时间)
+        public int getDealImageNum(string usernm, string yyyyMMdd)//打标签图片数量(打标签名字， 时间)
         {
+
             //获取五天内的文件夹路径下所有的xml文件路径
-            //List <string>getXmlPaths(usernm, tim, int)
+            //List <string>getXmlPaths()
             // decodexml(XMLDocument []);-->> xmlinfo {string name, int Rects ,string path , string tim}
             // 过滤时间不一样的和 名字不一样的
             // filterXml（xmlinfo）;
             /*************************************************************/
-            
 
+            //getXmlPaths();
+            //decodeXml();
+            DateTime dt = DateTime.ParseExact(yyyyMMdd, "yyyyMMdd", System.Globalization.CultureInfo.InvariantCulture);
+            string yyyy_MM_dd = dt.ToString("yyyy-MM-dd");
+            string format = usernm + "|" + yyyy_MM_dd;
+            List<XmlInfo> filerresult = filterXml(format);
 
+            return filerresult.Count;
         }
-        public void getDealImageRects(string name, string tim)//图片框数
+        public int getDealImageRects(string usernm, string yyyyMMdd)//图片框数
         {
-
+            DateTime dt = DateTime.ParseExact(yyyyMMdd, "yyyyMMdd", System.Globalization.CultureInfo.InvariantCulture);
+            string yyyy_MM_dd = dt.ToString("yyyy-MM-dd");
+            string format = usernm + "|" + yyyy_MM_dd;
+            List<XmlInfo> filerresult = filterXml(format);
+            int num = 0;
+            foreach(var single in filerresult)
+            {
+                num = num + Convert.ToInt16(single.segmented);
+            }
+            return num;
         }
         public void getDealImageGroups(string name, string tim)
         {
             // 根据过滤的， 今天计算了多少组
             // int calGroups(xmlinfo)
         }
-        private string namePath;
-        private List<string> xmlList;
-        
+        private string m_namePath;
+        private List<string> m_xmlList = new List<string>();
+        private List<string> m_fullXML = new List<string>();
+        private List<XmlInfo> m_fullXMLInfo = new List<XmlInfo>();
         
     }
 }
